@@ -14,9 +14,24 @@ spec:
         app: my-app
     spec:
       imagePullSecrets:
-        - name: dockerhub-secret  # This will be decrypted by Sealed Secrets
+        - name: dockerhub-secret  # Sealed Secret for private Docker images
       containers:
         - name: my-app-container
           image: vijaybvk/mypvtrepo:latest
           ports:
-            - containerPort: 80
+            - containerPort: 80  # Default NGINX port
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+  namespace: default
+spec:
+  selector:
+    app: my-app  # Matches the Deployment label
+  ports:
+    - protocol: TCP
+      port: 80       # Exposed service port
+      targetPort: 80  # Matches containerPort
+  type: LoadBalancer  # Exposes the app externally
